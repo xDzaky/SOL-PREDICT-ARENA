@@ -1,0 +1,42 @@
+# ==========================================
+# BACKEND - Git Ignore
+# ==========================================
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Prisma
+prisma/migrations/*_lock.toml
+
+# Tests
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.swp

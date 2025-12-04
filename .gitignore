@@ -1,0 +1,316 @@
+# ============================================
+# SOL PREDICT ARENA - Git Ignore File
+# ============================================
+
+# ==========================================
+# SENSITIVE FILES - NEVER COMMIT THESE!
+# ==========================================
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Solana keypairs (VERY IMPORTANT!)
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.*.json
+!vercel.json
+!railway.json
+!.eslintrc.json
+
+# Wallet private keys
+id.json
+keypair.json
+deployer.json
+authority.json
+~/.config/solana/*.json
+
+# ==========================================
+# DEPENDENCIES
+# ==========================================
+
+# Node modules
+node_modules/
+**/node_modules/
+.pnpm-store/
+.pnpm-debug.log
+
+# Rust/Cargo
+**/target/
+**/.cargo/
+Cargo.lock
+
+# Python (if using any Python scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+*.egg-info/
+
+# ==========================================
+# BUILD OUTPUTS
+# ==========================================
+
+# Frontend build
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.turbo/
+
+# Backend build
+backend/dist/
+backend/build/
+
+# Anchor build
+programs/**/target/
+test-ledger/
+.anchor/
+
+# IDL files (will be regenerated)
+target/idl/
+target/types/
+
+# ==========================================
+# LOGS
+# ==========================================
+
+# Log files
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================================
+# DATABASES
+# ==========================================
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Prisma
+.env
+prisma/migrations/*_migration_lock.toml
+
+# PostgreSQL
+*.dump
+*.sql
+
+# ==========================================
+# CACHING
+# ==========================================
+
+# Parcel cache
+.cache/
+.parcel-cache/
+
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+dist/
+
+# Gatsby
+.cache/
+public/
+
+# Vite
+.vite/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# ESLint cache
+.eslintcache
+
+# ==========================================
+# TESTING
+# ==========================================
+
+# Coverage directory
+coverage/
+*.lcov
+.nyc_output/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ==========================================
+# OPERATING SYSTEM
+# ==========================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ==========================================
+# IDEs / EDITORS
+# ==========================================
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# ==========================================
+# TEMPORARY FILES
+# ==========================================
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# ==========================================
+# DEPLOYMENT
+# ==========================================
+
+# Vercel
+.vercel/
+.vercel
+
+# Railway
+.railway/
+
+# Docker
+.dockerignore
+
+# ==========================================
+# SOLANA SPECIFIC
+# ==========================================
+
+# Local validator ledger
+test-ledger/
+
+# Solana config
+.config/solana/config.yml
+
+# BPF compiled programs
+*.so
+
+# ==========================================
+# PROJECT SPECIFIC
+# ==========================================
+
+# Internal documentation (tidak perlu di GitHub)
+PLAYGROUND_DEPLOY_GUIDE.md
+PLAYGROUND_COPY_PASTE.md
+PLAYGROUND_TEST_GUIDE.md
+INSTALLATION_GUIDE.md
+ENV_SETUP_GUIDE.md
+GIT_IGNORE_GUIDE.md
+READY_TO_PUSH.md
+NEXT_STEPS.md
+SMART_CONTRACT_SUMMARY.md
+LEADERBOARD_SYSTEM.md
+LOVABLE_LANDING_PAGE_PROMPT.md
+QUICKSTART.md
+
+# Push script (internal use only)
+push.sh
+copy-to-playground.sh
+deploy.sh
+start.sh
+
+# Large documentation (if you have it)
+# docs/assets/*.mp4
+# docs/assets/*.mov
+
+# Mock/Test data
+mock-data/
+test-data/
+
+# Generated types (regenerate from IDL)
+# Uncomment if you want to regenerate these
+# **/types/sol_predict_arena.ts
+
+# ==========================================
+# KEEP THESE FILES
+# ==========================================
+
+# Configuration files to keep
+!.gitignore
+!.prettierrc
+!.prettierignore
+!README.md
+!LICENSE
+
+# Important JSON configs
+!tsconfig.json
+!package.json
+!Anchor.toml
+
+# ==========================================
+# NOTES
+# ==========================================
+
+# This .gitignore ensures:
+# 1. No private keys or wallets are pushed
+# 2. No environment variables with secrets
+# 3. No node_modules (saves space)
+# 4. No build artifacts (can regenerate)
+# 5. No local database files
+# 6. No OS-specific files

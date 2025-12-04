@@ -1,0 +1,39 @@
+# ==========================================
+# FRONTEND - Git Ignore
+# ==========================================
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.vite/
+
+# Logs
+*.log
+
+# Cache
+.eslintcache
+*.tsbuildinfo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Vercel
+.vercel/

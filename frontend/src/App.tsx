@@ -1,33 +1,20 @@
-import { useMemo } from "react";
-import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-import { WalletModalProvider, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
-import { clusterApiUrl } from "@solana/web3.js";
-import "@solana/wallet-adapter-react-ui/styles.css";
+import WalletButton from "./components/wallet/WalletButton";
 
 const App = () => {
-  const endpoint = clusterApiUrl("devnet");
-
-  const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], []);
-
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <main className="min-h-screen bg-midnight text-white flex flex-col items-center justify-center gap-6">
-            <div className="space-y-4 text-center">
-              <p className="uppercase tracking-[0.5em] text-accent-cyan text-sm">Sol Predict Arena</p>
-              <h1 className="text-4xl font-semibold">Connect your wallet to enter the arena</h1>
-              <p className="text-slate-300 max-w-lg">
-                This starter interface wires up the Solana wallet adapter and Tailwind CSS so you can jump straight into
-                building the PvP prediction experience.
-              </p>
-            </div>
-            <WalletMultiButton className="bg-accent-purple hover:bg-purple-600 transition" />
-          </main>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <main className="min-h-screen bg-gradient-to-b from-[#05060d] via-[#090f1d] to-[#05060d] px-4 py-12 text-white">
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 text-center">
+        <div className="space-y-4">
+          <p className="uppercase tracking-[0.4em] text-cyan-300 text-xs">Sol Predict Arena</p>
+          <h1 className="text-4xl font-bold sm:text-5xl">Connect your wallet to enter the arena</h1>
+          <p className="text-slate-300/90 max-w-2xl">
+            Manage multi-wallet connections, switch networks, and monitor your balance with a sleek Solana-ready control
+            panel. This component serves as the foundation for the rest of the PvP prediction experience.
+          </p>
+        </div>
+        <WalletButton />
+      </div>
+    </main>
   );
 };
 
