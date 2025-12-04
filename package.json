@@ -1,0 +1,15 @@
+{
+  "name": "sol-predict-arena-anchor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "anchor build",
+    "test": "anchor test"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@types/mocha": "^10.0.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

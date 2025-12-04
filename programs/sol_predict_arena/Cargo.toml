@@ -1,0 +1,18 @@
+[package]
+name = "sol_predict_arena"
+authors = ["Your Name <you@example.com>"]
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "sol_predict_arena"
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+
+[dependencies]
+anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"
