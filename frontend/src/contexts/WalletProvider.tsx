@@ -5,7 +5,6 @@ import {
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import {
-  BackpackWalletAdapter,
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
@@ -56,10 +55,9 @@ export const SolanaWalletProvider = ({ children }: PropsWithChildren) => {
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
-      new SolflareWalletAdapter({ network }),
-      new BackpackWalletAdapter(),
+      new SolflareWalletAdapter(),
     ],
-    [network]
+    []
   );
 
   const handleWalletError = useCallback((walletError: WalletError) => {

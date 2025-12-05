@@ -1,0 +1,205 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// PLAYERS - Cache of on-chain player data
+// ============================================
+model Player {
+  id              String   @id @default(uuid())
+  walletAddress   String   @unique @map("wallet_address")
+  username        String?  @db.VarChar(28)
+  totalMatches    Int      @default(0) @map("total_matches")
+  wins            Int      @default(0)
+  losses          Int      @default(0)
+  xp              BigInt   @default(0)
+  level           Int      @default(1)
+  currentStreak   Int      @default(0) @map("current_streak")
+  bestStreak      Int      @default(0) @map("best_streak")
+  badges          Int[]    @default([])
+  seasonPoints    BigInt   @default(0) @map("season_points")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  lastSeen        DateTime @default(now()) @map("last_seen")
+  
+  // Relations
+  matchesAsPlayer1    Match[]            @relation("Player1Matches")
+  matchesAsPlayer2    Match[]            @relation("Player2Matches")
+  leaderboardEntries  LeaderboardCache[]
+  dailyAttempts       DailyAttempt[]
+
+  @@index([walletAddress])
+  @@index([seasonPoints(sort: Desc)])
+  @@index([xp(sort: Desc)])
+  @@index([lastSeen])
+  @@map("players")
+}
+
+// ============================================
+// MATCHES - Complete match history
+// ============================================
+model Match {
+  id              String    @id @default(uuid())
+  gameId          String    @unique @map("game_id")
+  player1Id       String    @map("player1_id")
+  player2Id       String    @map("player2_id")
+  player1Choice   String    @map("player1_choice") // "up" or "down"
+  player2Choice   String    @map("player2_choice")
+  challengeType   String    @map("challenge_type") // "price_movement", "random", etc.
+  startPrice      Decimal?  @map("start_price") @db.Decimal(18, 8)
+  endPrice        Decimal?  @map("end_price") @db.Decimal(18, 8)
+  priceChange     Decimal?  @map("price_change") @db.Decimal(10, 4)
+  winnerId        String?   @map("winner_id")
+  result          String    // "player1", "player2", "draw"
+  duration        Int       // in seconds
+  xpAwarded       Int       @default(0) @map("xp_awarded")
+  seasonId        Int?      @map("season_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  player1   Player  @relation("Player1Matches", fields: [player1Id], references: [id])
+  player2   Player  @relation("Player2Matches", fields: [player2Id], references: [id])
+  season    Season? @relation(fields: [seasonId], references: [id])
+
+  @@index([player1Id])
+  @@index([player2Id])
+  @@index([winnerId])
+  @@index([seasonId])
+  @@index([createdAt(sort: Desc)])
+  @@index([challengeType])
+  @@map("matches")
+}
+
+// ============================================
+// LEADERBOARD CACHE - Fast leaderboard queries
+// ============================================
+model LeaderboardCache {
+  id            String   @id @default(uuid())
+  seasonId      Int      @map("season_id")
+  playerId      String   @map("player_id")
+  walletAddress String   @map("wallet_address")
+  username      String?  @db.VarChar(28)
+  rank          Int
+  score         BigInt
+  wins          Int
+  losses        Int
+  winRate       Decimal  @db.Decimal(5, 2) @map("win_rate")
+  totalMatches  Int      @map("total_matches")
+  xp            BigInt
+  level         Int
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  player  Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season  Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, playerId])
+  @@index([seasonId, rank])
+  @@index([seasonId, score(sort: Desc)])
+  @@index([walletAddress])
+  @@map("leaderboard_cache")
+}
+
+// ============================================
+// SEASONS - Season tracking
+// ============================================
+model Season {
+  id              Int                @id @default(autoincrement())
+  seasonId        Int                @unique @map("season_id")
+  name            String             @db.VarChar(100)
+  startTime       DateTime           @map("start_time")
+  endTime         DateTime           @map("end_time")
+  isActive        Boolean            @default(false) @map("is_active")
+  totalPlayers    Int                @default(0) @map("total_players")
+  totalMatches    Int                @default(0) @map("total_matches")
+  prizePool       Decimal?           @db.Decimal(18, 8) @map("prize_pool")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+  
+  // Relations
+  matches           Match[]
+  leaderboardCache  LeaderboardCache[]
+
+  @@index([isActive])
+  @@index([startTime, endTime])
+  @@map("seasons")
+}
+
+// ============================================
+// DAILY CHALLENGES - Daily challenge tracking
+// ============================================
+model DailyChallenge {
+  id              String         @id @default(uuid())
+  challengeDate   DateTime       @unique @map("challenge_date") @db.Date
+  challengeType   String         @map("challenge_type") // "price_movement", "streak", etc.
+  description     String         @db.Text
+  targetValue     Decimal?       @db.Decimal(18, 8) @map("target_value")
+  difficulty      String         // "easy", "medium", "hard"
+  xpReward        Int            @map("xp_reward")
+  badgeReward     Int?           @map("badge_reward")
+  isActive        Boolean        @default(true) @map("is_active")
+  totalAttempts   Int            @default(0) @map("total_attempts")
+  successfulAttempts Int         @default(0) @map("successful_attempts")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  
+  // Relations
+  attempts  DailyAttempt[]
+
+  @@index([challengeDate])
+  @@index([isActive])
+  @@map("daily_challenges")
+}
+
+// ============================================
+// DAILY ATTEMPTS - Player daily challenge attempts
+// ============================================
+model DailyAttempt {
+  id              String         @id @default(uuid())
+  challengeId     String         @map("challenge_id")
+  playerId        String         @map("player_id")
+  playerAddress   String         @map("player_address")
+  isSuccessful    Boolean        @map("is_successful")
+  attemptValue    Decimal?       @db.Decimal(18, 8) @map("attempt_value")
+  xpEarned        Int            @default(0) @map("xp_earned")
+  badgeEarned     Int?           @map("badge_earned")
+  attemptedAt     DateTime       @default(now()) @map("attempted_at")
+  
+  // Relations
+  challenge  DailyChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  player     Player         @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, playerId])
+  @@index([challengeId])
+  @@index([playerId])
+  @@index([playerAddress])
+  @@index([attemptedAt])
+  @@map("daily_attempts")
+}
+
+// ============================================
+// ANALYTICS - Optional: Game analytics
+// ============================================
+model GameAnalytics {
+  id                    String   @id @default(uuid())
+  date                  DateTime @db.Date
+  totalPlayers          Int      @default(0) @map("total_players")
+  activePlayersDaily    Int      @default(0) @map("active_players_daily")
+  newPlayers            Int      @default(0) @map("new_players")
+  totalMatches          Int      @default(0) @map("total_matches")
+  averageMatchDuration  Int      @default(0) @map("average_match_duration")
+  totalXpAwarded        BigInt   @default(0) @map("total_xp_awarded")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@unique([date])
+  @@index([date(sort: Desc)])
+  @@map("game_analytics")
+}

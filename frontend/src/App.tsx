@@ -1,9 +1,12 @@
 import WalletButton from "./components/wallet/WalletButton";
+import PlayerProfilePanel from "./components/profile/PlayerProfilePanel";
+import ArenaPvPPage from "./components/arena/ArenaPvPPage";
+import LeaderboardPage from "./components/leaderboard/LeaderboardPage";
 
 const App = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#05060d] via-[#090f1d] to-[#05060d] px-4 py-12 text-white">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 text-center">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 text-center">
         <div className="space-y-4">
           <p className="uppercase tracking-[0.4em] text-cyan-300 text-xs">Sol Predict Arena</p>
           <h1 className="text-4xl font-bold sm:text-5xl">Connect your wallet to enter the arena</h1>
@@ -13,6 +16,9 @@ const App = () => {
           </p>
         </div>
         <WalletButton />
+        <PlayerProfilePanel />
+        <ArenaPvPPage />
+        <LeaderboardPage />
       </div>
     </main>
   );

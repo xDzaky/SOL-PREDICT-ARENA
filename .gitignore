@@ -268,12 +268,26 @@ SMART_CONTRACT_SUMMARY.md
 LEADERBOARD_SYSTEM.md
 LOVABLE_LANDING_PAGE_PROMPT.md
 QUICKSTART.md
+playground-files.txt
 
 # Push script (internal use only)
 push.sh
 copy-to-playground.sh
 deploy.sh
 start.sh
+setup-tests.sh
+
+# Backend temporary/test files
+backend/quick-test.ts
+backend/test-api.ts
+backend/DATABASE.md
+backend/DATABASE_IMPLEMENTATION_SUMMARY.md
+backend/PYTH_IMPLEMENTATION_SUMMARY.md
+backend/QUICK_START_PYTH.md
+
+# Temporary markdown files
+err.md
+tech-spec.md
 
 # Large documentation (if you have it)
 # docs/assets/*.mp4
