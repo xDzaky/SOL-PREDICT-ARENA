@@ -9,8 +9,21 @@
     "test:pyth": "tsx src/tests/pythPriceService.test.ts",
     "test:db": "tsx src/tests/databaseQueries.test.ts",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:create": "prisma migrate dev --create-only",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
+    "db:migrate:reset": "prisma migrate reset",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:seed:sql": "psql $DATABASE_URL -f prisma/seed.sql",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "db:validate": "prisma validate",
+    "db:format": "prisma format",
+    "db:clear": "psql $DATABASE_URL -f prisma/clear-data.sql",
+    "db:backup": "pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql",
+    "db:init": "prisma migrate dev && prisma db seed"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
