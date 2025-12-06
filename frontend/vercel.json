@@ -1,9 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && pnpm install --frozen-lockfile && pnpm run build",
-  "installCommand": "cd frontend && pnpm install --frozen-lockfile",
-  "outputDirectory": "frontend/dist",
-  "devCommand": "cd frontend && pnpm run dev -- --host 0.0.0.0",
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "dist",
   "framework": "vite",
   "regions": ["iad1"],
   "github": {
@@ -29,8 +28,18 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.devnet.solana.com https://hermes.pyth.network wss://*"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
