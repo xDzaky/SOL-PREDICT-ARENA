@@ -23,8 +23,10 @@ dotenv.config();
 
 const app = express();
 
-// Trust proxy for Railway deployment
-app.set('trust proxy', true);
+// ⚠️ CRITICAL: Trust proxy MUST be set BEFORE any middleware
+// Railway uses proxies that set X-Forwarded-For headers
+// Set to 1 to trust only the first proxy (Railway's proxy)
+app.set('trust proxy', 1);
 
 // CORS configuration - allow multiple origins
 const allowedOrigins = [

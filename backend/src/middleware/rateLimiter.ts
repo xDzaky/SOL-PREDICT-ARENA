@@ -1,5 +1,8 @@
 /**
  * Rate Limiting Middleware
+ * 
+ * IMPORTANT: Make sure Express app has 'trust proxy' enabled:
+ * app.set('trust proxy', 1);
  */
 
 import rateLimit from 'express-rate-limit';
