@@ -27,6 +27,7 @@ const LeaderboardFilters = ({ scope, onScopeChange, search, onSearchChange, onRe
               scope === option ? "bg-gradient-to-r from-purple-500 to-cyan-500 text-white" : "bg-white/5 text-white/60"
             }`}
             onClick={() => onScopeChange(option)}
+            aria-pressed={scope === option}
           >
             {option === "global" ? "Global" : "Current Season"}
           </motion.button>
@@ -40,6 +41,7 @@ const LeaderboardFilters = ({ scope, onScopeChange, search, onSearchChange, onRe
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search wallet or username"
+            data-testid="leaderboard-search"
             className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
           />
         </label>

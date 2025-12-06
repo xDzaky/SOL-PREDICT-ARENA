@@ -40,11 +40,12 @@ const LeaderboardTable = ({ entries, currentWallet }: LeaderboardTableProps) => 
                 className={`grid gap-4 px-4 py-4 text-white transition hover:bg-white/5 md:grid-cols-5 md:px-6 ${
                   isCurrentUser ? "bg-gradient-to-r from-cyan-500/10 to-transparent" : ""
                 }`}
+                data-testid="leaderboard-row"
               >
                 <div className="flex items-center gap-3 text-sm font-semibold">
                   {isTopThree ? (
                     <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${medal?.bg ?? ""} ${medal?.text ?? ""}`}>
-                      {entry.rank === 1 ? <Crown size={22} /> : <Medal size={22} />}
+                      {entry.rank === 1 ? <Crown size={22} data-testid="crown-icon" /> : <Medal size={22} data-testid="medal-icon" />}
                     </div>
                   ) : (
                     <span className="text-white/60">#{entry.rank}</span>

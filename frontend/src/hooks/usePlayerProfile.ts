@@ -17,8 +17,10 @@ import {
   PlayerProfileAccount,
   UpdateStatsArgs,
 } from "../types/playerProfile";
+import { useMockPlayerProfile } from "./usePlayerProfile.mock";
 
 const PLAYER_PROFILE_QUERY_KEY = "player-profile";
+const USE_MOCK_PROFILE = import.meta.env.VITE_E2E_TEST === "true";
 
 type PlayerProfileRaw = {
   owner: PublicKey;
@@ -91,22 +93,29 @@ export interface UsePlayerProfileReturn {
 }
 
 export const usePlayerProfile = (): UsePlayerProfileReturn => {
+  // Always call all hooks first (Rules of Hooks)
   const { connection } = useConnection();
   const anchorWallet = useAnchorWallet();
   const { publicKey } = useWallet();
   const queryClient = useQueryClient();
+  
+  // Call mock hook but only use its return if needed
+  const mockProfile = useMockPlayerProfile();
 
   const provider = useMemo(() => {
+    if (USE_MOCK_PROFILE) return null; // Don't create provider if using mock
     if (!anchorWallet) return null;
     return new AnchorProvider(connection, anchorWallet, { commitment: DEFAULT_COMMITMENT });
   }, [anchorWallet, connection]);
 
   const program = useMemo(() => {
+    if (USE_MOCK_PROFILE) return null; // Don't create program if using mock
     if (!provider) return null;
     return new Program<SolPredictArenaIdl>(SOL_PREDICT_ARENA_IDL, SOL_PREDICT_PROGRAM_ID, provider);
   }, [provider]);
 
   const getPlayerProfile = useCallback(async () => {
+    if (USE_MOCK_PROFILE) return null; // Mock data is handled separately
     if (!program || !publicKey) return null;
 
     const [playerProfilePda] = derivePlayerProfilePda(publicKey);
@@ -141,22 +150,27 @@ export const usePlayerProfile = (): UsePlayerProfileReturn => {
   } = useQuery<PlayerProfileAccount | null>({
     queryKey: playerProfileQueryKey,
     queryFn: getPlayerProfile,
-    enabled: Boolean(publicKey && program),
+    enabled: !USE_MOCK_PROFILE && Boolean(publicKey && program),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
 
   const fetchPlayerProfile = useCallback(async () => {
+    if (USE_MOCK_PROFILE) return mockProfile.profile;
     const result = await refetch();
     if (result.error) throw result.error;
     return result.data ?? null;
-  }, [refetch]);
+  }, [refetch, mockProfile]);
 
   const invalidateProfile = useCallback(async () => {
+    if (USE_MOCK_PROFILE) return;
     await queryClient.invalidateQueries({ queryKey: playerProfileQueryKey });
   }, [playerProfileQueryKey, queryClient]);
 
   const getProgramContext = useCallback(() => {
+    if (USE_MOCK_PROFILE) {
+      throw new Error("Mock mode: transactions disabled");
+    }
     if (!program || !publicKey) {
       throw new Error("Connect your wallet to interact with the player profile");
     }
@@ -166,6 +180,7 @@ export const usePlayerProfile = (): UsePlayerProfileReturn => {
   const initializeMutation = useMutation({
     mutationKey: ["initialize-player"],
     mutationFn: async ({ username }: InitializePlayerArgs) => {
+      if (USE_MOCK_PROFILE) return mockProfile.initializePlayer({ username });
       const { program: currentProgram, owner } = getProgramContext();
       const [playerProfilePda] = derivePlayerProfilePda(owner);
       const builder = currentProgram.methods.initializePlayer?.(username);
@@ -186,6 +201,7 @@ export const usePlayerProfile = (): UsePlayerProfileReturn => {
   const updateStatsMutation = useMutation({
     mutationKey: ["update-player-stats"],
     mutationFn: async ({ wins, losses, xp }: UpdateStatsArgs) => {
+      if (USE_MOCK_PROFILE) return mockProfile.updateStats({ wins, losses, xp });
       const { program: currentProgram, owner } = getProgramContext();
       const [playerProfilePda] = derivePlayerProfilePda(owner);
       const builder = currentProgram.methods.updateStats?.(wins, losses, xp);
@@ -205,6 +221,7 @@ export const usePlayerProfile = (): UsePlayerProfileReturn => {
   const awardBadgeMutation = useMutation({
     mutationKey: ["award-player-badge"],
     mutationFn: async ({ badgeId }: AwardBadgeArgs) => {
+      if (USE_MOCK_PROFILE) return mockProfile.awardBadge({ badgeId });
       const { program: currentProgram, owner } = getProgramContext();
       const [playerProfilePda] = derivePlayerProfilePda(owner);
       const builder = currentProgram.methods.awardBadge?.(badgeId);
@@ -220,6 +237,11 @@ export const usePlayerProfile = (): UsePlayerProfileReturn => {
     },
     onSuccess: invalidateProfile,
   });
+
+  // Return mock data if in E2E test mode
+  if (USE_MOCK_PROFILE) {
+    return mockProfile;
+  }
 
   return {
     profile: profile ?? null,

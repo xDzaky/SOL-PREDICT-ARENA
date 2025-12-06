@@ -34,6 +34,10 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.swp
+playwright-report/
+test-results/
+blob-report/
+.playwright-cache/
 
 # Vercel
 .vercel/

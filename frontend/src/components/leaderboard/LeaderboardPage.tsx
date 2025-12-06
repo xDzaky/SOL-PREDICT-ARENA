@@ -50,7 +50,10 @@ const LeaderboardPage = () => {
   };
 
   return (
-    <section className="w-full rounded-[40px] border border-white/5 bg-gradient-to-b from-[#05060d] via-[#0c142b] to-[#05060d] px-3 py-10 text-white sm:px-8">
+    <section
+      className="w-full rounded-[40px] border border-white/5 bg-gradient-to-b from-[#05060d] via-[#0c142b] to-[#05060d] px-3 py-10 text-white sm:px-8"
+      data-testid="leaderboard-section"
+    >
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.4em] text-cyan-300">Leaderboard</p>

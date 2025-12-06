@@ -9,7 +9,8 @@ import ResultModal from "./ResultModal";
 import { usePythPrice } from "../../hooks/usePythPrice";
 import type { ArenaChallenge, ArenaPlayer, ArenaResult, PredictionDirection } from "../../types/game";
 
-const ROUND_DURATION = 30;
+const IS_E2E_TEST = import.meta.env.VITE_E2E_TEST === "true";
+const ROUND_DURATION = IS_E2E_TEST ? 3 : 30;
 
 const primaryPlayer: ArenaPlayer = {
   address: "5EyktBz..User",
@@ -72,7 +73,7 @@ const ArenaPvPPage = () => {
   const [roundId, setRoundId] = useState(1);
   const [playerChoice, setPlayerChoice] = useState<PredictionDirection | null>(null);
   const [opponentChoice, setOpponentChoice] = useState<PredictionDirection | null>(null);
-  const [isCountdownActive, setIsCountdownActive] = useState(true);
+  const [isCountdownActive, setIsCountdownActive] = useState(!IS_E2E_TEST);
   const [isWaiting, setIsWaiting] = useState(false);
   const [result, setResult] = useState<ArenaResult | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -125,7 +126,8 @@ const ArenaPvPPage = () => {
   useEffect(() => {
     if (!isCountdownActive && timeLeft === 0 && !result) {
       setIsWaiting(true);
-      const timeout = window.setTimeout(() => resolveRound(), 1200);
+      const resolutionDelay = IS_E2E_TEST ? 400 : 1200;
+      const timeout = window.setTimeout(() => resolveRound(), resolutionDelay);
       return () => window.clearTimeout(timeout);
     }
     return undefined;
@@ -135,7 +137,11 @@ const ArenaPvPPage = () => {
     if (playerChoice !== null) return;
     setPlayerChoice(choice);
     setIsWaiting(true);
-    const delay = 600 + Math.random() * 1200;
+    if (IS_E2E_TEST) {
+      setTimeLeft(1);
+      setIsCountdownActive(true);
+    }
+    const delay = IS_E2E_TEST ? 200 : 600 + Math.random() * 1200;
     window.setTimeout(() => {
       setOpponentChoice(Math.random() > 0.5 ? "up" : "down");
     }, delay);
@@ -148,7 +154,7 @@ const ArenaPvPPage = () => {
     setOpponentChoice(null);
     setTimeLeft(challenge.duration);
     setRoundBaselinePrice(price ?? null);
-    setIsCountdownActive(true);
+    setIsCountdownActive(!IS_E2E_TEST);
     setIsWaiting(false);
     setRoundId((prev) => prev + 1);
   };
@@ -163,7 +169,7 @@ const ArenaPvPPage = () => {
   }, [isWaiting, opponentChoice, playerChoice]);
 
   return (
-    <section className="w-full rounded-[40px] border border-white/5 bg-[#0f172a]/80 p-6 sm:p-10">
+    <section className="w-full rounded-[40px] border border-white/5 bg-[#0f172a]/80 p-6 sm:p-10" data-testid="arena-section">
       <div className="mb-6 flex flex-col gap-2 text-white/60">
         <p className="text-xs uppercase tracking-[0.4em] text-cyan-300">Live PvP Arena</p>
         <div className="flex flex-wrap items-center gap-3 text-sm">

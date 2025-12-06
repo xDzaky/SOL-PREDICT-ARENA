@@ -53,7 +53,10 @@ const PredictionPanel = ({ onSelect, disabled = false, selected, isWaiting }: Pr
         })}
       </div>
       {isWaiting && (
-        <div className="flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-100">
+        <div
+          data-testid="prediction-waiting"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-100"
+        >
           <Loader2 size={18} className="animate-spin" /> Waiting for opponent & oracle result...
         </div>
       )}

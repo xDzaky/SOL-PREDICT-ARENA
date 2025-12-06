@@ -12,6 +12,24 @@ import idl from "../idl/sol_predict_arena.json";
 // Type for the program
 export type SolPredictArena = anchor.Program<anchor.Idl>;
 
+// Type for player profile account
+export interface PlayerProfileAccount {
+  owner: PublicKey;
+  username: string;
+  totalMatches: number;
+  wins: number;
+  losses: number;
+  xp: anchor.BN;
+  level: number;
+  currentStreak: number;
+  bestStreak: number;
+  badges: number[];
+  createdAt: anchor.BN;
+  lastActive: anchor.BN;
+  seasonPoints: anchor.BN;
+  bump: number;
+}
+
 // Program ID from environment
 const PROGRAM_ID = new PublicKey(import.meta.env.VITE_PROGRAM_ID);
 
@@ -24,7 +42,7 @@ export function getProgram(
 ): Program {
   const provider = new AnchorProvider(
     connection,
-    wallet as any,
+    wallet as unknown as anchor.Wallet,
     AnchorProvider.defaultOptions()
   );
   
@@ -82,8 +100,12 @@ export async function initializePlayer(
   
   const [playerPDA] = derivePlayerPDA(owner);
   
-  const tx = await program.methods
-    .initializePlayer(username)
+  const methodBuilder = program.methods?.initializePlayer?.(username);
+  if (!methodBuilder) {
+    throw new Error("initializePlayer method not found in program");
+  }
+  
+  const tx = await methodBuilder
     .accounts({
       playerProfile: playerPDA,
       owner: owner,
@@ -100,13 +122,17 @@ export async function initializePlayer(
 export async function fetchPlayerProfile(
   program: Program,
   owner: PublicKey
-): Promise<any> {
+): Promise<PlayerProfileAccount | null> {
   const [playerPDA] = derivePlayerPDA(owner);
   
   try {
-    const account = await program.account.playerProfile.fetch(playerPDA);
-    return account;
-  } catch (error) {
+    const accountNamespace = program.account?.playerProfile;
+    if (!accountNamespace) {
+      throw new Error("PlayerProfile account not found in program");
+    }
+    const account = await accountNamespace.fetch(playerPDA);
+    return account as unknown as PlayerProfileAccount;
+  } catch {
     return null; // Player doesn't exist
   }
 }
@@ -125,8 +151,12 @@ export async function updatePlayerStats(
   
   const [playerPDA] = derivePlayerPDA(owner);
   
-  const tx = await program.methods
-    .updateStats(wins, losses, new BN(xp))
+  const methodBuilder = program.methods?.updateStats?.(wins, losses, new BN(xp));
+  if (!methodBuilder) {
+    throw new Error("updateStats method not found in program");
+  }
+  
+  const tx = await methodBuilder
     .accounts({
       playerProfile: playerPDA,
       owner: owner,
@@ -148,8 +178,12 @@ export async function awardBadge(
   
   const [playerPDA] = derivePlayerPDA(owner);
   
-  const tx = await program.methods
-    .awardBadge(badgeId)
+  const methodBuilder = program.methods?.awardBadge?.(badgeId);
+  if (!methodBuilder) {
+    throw new Error("awardBadge method not found in program");
+  }
+  
+  const tx = await methodBuilder
     .accounts({
       playerProfile: playerPDA,
       owner: owner,
@@ -171,8 +205,12 @@ export async function updateSeasonPoints(
   
   const [playerPDA] = derivePlayerPDA(owner);
   
-  const tx = await program.methods
-    .updateSeasonPoints(new BN(pointsDelta))
+  const methodBuilder = program.methods?.updateSeasonPoints?.(new BN(pointsDelta));
+  if (!methodBuilder) {
+    throw new Error("updateSeasonPoints method not found in program");
+  }
+  
+  const tx = await methodBuilder
     .accounts({
       playerProfile: playerPDA,
       owner: owner,
@@ -196,8 +234,12 @@ export async function initializeSeason(
   
   const [seasonPDA] = deriveSeasonPDA(seasonId);
   
-  const tx = await program.methods
-    .initializeSeason(seasonId, new BN(startTime), new BN(endTime))
+  const methodBuilder = program.methods?.initializeSeason?.(seasonId, new BN(startTime), new BN(endTime));
+  if (!methodBuilder) {
+    throw new Error("initializeSeason method not found in program");
+  }
+  
+  const tx = await methodBuilder
     .accounts({
       season: seasonPDA,
       admin: admin,
@@ -214,13 +256,17 @@ export async function initializeSeason(
 export async function fetchSeason(
   program: Program,
   seasonId: number
-): Promise<any> {
+): Promise<Record<string, unknown> | null> {
   const [seasonPDA] = deriveSeasonPDA(seasonId);
   
   try {
-    const account = await program.account.season.fetch(seasonPDA);
-    return account;
-  } catch (error) {
+    const accountNamespace = program.account?.season;
+    if (!accountNamespace) {
+      throw new Error("Season account not found in program");
+    }
+    const account = await accountNamespace.fetch(seasonPDA);
+    return account as Record<string, unknown>;
+  } catch {
     return null;
   }
 }
@@ -237,8 +283,12 @@ export async function endSeason(
   
   const [seasonPDA] = deriveSeasonPDA(seasonId);
   
-  const tx = await program.methods
-    .endSeason(seasonId)
+  const methodBuilder = program.methods?.endSeason?.(seasonId);
+  if (!methodBuilder) {
+    throw new Error("endSeason method not found in program");
+  }
+  
+  const tx = await methodBuilder
     .accounts({
       season: seasonPDA,
       admin: admin,
@@ -262,8 +312,12 @@ export async function updateLeaderboard(
   const [leaderboardPDA] = deriveLeaderboardPDA(seasonId, player);
   const [seasonPDA] = deriveSeasonPDA(seasonId);
   
-  const tx = await program.methods
-    .updateLeaderboard(seasonId, new BN(scoreDelta))
+  const methodBuilder = program.methods?.updateLeaderboard?.(seasonId, new BN(scoreDelta));
+  if (!methodBuilder) {
+    throw new Error("updateLeaderboard method not found in program");
+  }
+  
+  const tx = await methodBuilder
     .accounts({
       leaderboardEntry: leaderboardPDA,
       season: seasonPDA,
@@ -282,13 +336,17 @@ export async function fetchLeaderboardEntry(
   program: Program,
   seasonId: number,
   player: PublicKey
-): Promise<any> {
+): Promise<Record<string, unknown> | null> {
   const [leaderboardPDA] = deriveLeaderboardPDA(seasonId, player);
   
   try {
-    const account = await program.account.leaderboardEntry.fetch(leaderboardPDA);
-    return account;
-  } catch (error) {
+    const accountNamespace = program.account?.leaderboardEntry;
+    if (!accountNamespace) {
+      throw new Error("LeaderboardEntry account not found in program");
+    }
+    const account = await accountNamespace.fetch(leaderboardPDA);
+    return account as Record<string, unknown>;
+  } catch {
     return null;
   }
 }

@@ -27,6 +27,7 @@ const CountdownTimer = ({ duration, timeLeft, label = "Timer", isWaiting = false
         <div className="flex w-full items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
             <motion.div
+              data-testid="timer-progress"
               className={`h-full rounded-full bg-gradient-to-r ${
                 isWaiting ? "from-purple-400 via-blue-400 to-cyan-400" : "from-cyan-400 via-blue-500 to-purple-500"
               }`}

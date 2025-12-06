@@ -4,7 +4,14 @@ import { Loader2, RefreshCw, Sparkles, Trophy, UserPlus } from "lucide-react";
 
 import { usePlayerProfile } from "../../hooks/usePlayerProfile";
 
+const MATCH_HISTORY_FIXTURES = [
+  { opponent: "SolarBlade", result: "Win", direction: "UP", delta: "+3.1%", timestamp: "2m ago" },
+  { opponent: "NeonFox", result: "Lose", direction: "DOWN", delta: "-1.2%", timestamp: "12m ago" },
+  { opponent: "Orbit", result: "Win", direction: "UP", delta: "+0.8%", timestamp: "27m ago" },
+];
+
 const numberFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
+const IS_E2E_TEST = import.meta.env.VITE_E2E_TEST === "true";
 
 export const PlayerProfilePanel = () => {
   const { publicKey, connected } = useWallet();
@@ -32,13 +39,15 @@ export const PlayerProfilePanel = () => {
   const [badgeId, setBadgeId] = useState("1");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
+  const isWalletConnected = connected || IS_E2E_TEST;
+
   const profileStatus = useMemo(() => {
-    if (!connected) return "Connect your wallet to load your on-chain profile.";
+    if (!isWalletConnected) return "Connect your wallet to load your on-chain profile.";
     if (isLoading) return "Fetching profile from Solana...";
     if (profile) return `Profile found for ${profile.username}`;
     if (!profile && !isLoading) return "No profile found. Initialize one to start tracking matches.";
     return null;
-  }, [connected, isLoading, profile]);
+  }, [isLoading, isWalletConnected, profile]);
 
   const submitWithFeedback = async (action: () => Promise<string>, successMessage: string) => {
     try {
@@ -88,7 +97,7 @@ export const PlayerProfilePanel = () => {
   const renderValue = (value: number | string) => (typeof value === "number" ? numberFormatter.format(value) : value);
 
   return (
-    <section className="w-full max-w-5xl space-y-6">
+    <section className="w-full max-w-5xl space-y-6" data-testid="profile-panel">
       <header className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 px-6 py-5 text-left shadow-[0_20px_60px_rgba(99,102,241,0.15)]">
         <div className="flex items-center gap-3 text-sm font-semibold text-cyan-300">
           <Sparkles className="h-4 w-4" />
@@ -100,7 +109,7 @@ export const PlayerProfilePanel = () => {
           <button
             type="button"
             onClick={() => fetchPlayerProfile()}
-            disabled={!publicKey || isLoading || isRefetching}
+            disabled={(!publicKey && !IS_E2E_TEST) || isLoading || isRefetching}
             className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 font-semibold text-white transition hover:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isRefetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
@@ -141,7 +150,9 @@ export const PlayerProfilePanel = () => {
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-400">XP</dt>
-                <dd className="text-lg font-semibold text-white">{renderValue(profile.xp)}</dd>
+                <dd className="text-lg font-semibold text-white" data-testid="profile-xp">
+                  {renderValue(profile.xp)}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-400">Badges</dt>
@@ -207,6 +218,7 @@ export const PlayerProfilePanel = () => {
                     min={0}
                     value={statsForm[field]}
                     onChange={(event) => setStatsForm((prev) => ({ ...prev, [field]: event.target.value }))}
+                    aria-label={`${field}-input`}
                     className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-cyan-300 focus:outline-none"
                   />
                 </label>
@@ -232,6 +244,7 @@ export const PlayerProfilePanel = () => {
               min={1}
               value={badgeId}
               onChange={(event) => setBadgeId(event.target.value)}
+              data-testid="badge-input"
               className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white focus:border-cyan-300 focus:outline-none"
             />
             {awardBadgeError && <p className="mt-2 text-xs text-rose-300">{awardBadgeError.message}</p>}
@@ -245,6 +258,31 @@ export const PlayerProfilePanel = () => {
             </button>
           </form>
         </div>
+      </div>
+
+      <div className="rounded-3xl border border-white/10 bg-[#0d1324] p-5" data-testid="match-history-panel">
+        <div className="flex items-center gap-2 text-sm font-semibold text-cyan-300">
+          <Sparkles className="h-4 w-4" /> Recent match history
+        </div>
+        <p className="mt-1 text-xs text-slate-400">Replay your last duels to refine prediction strategies.</p>
+        <ul className="mt-4 space-y-3 text-sm text-white/80" data-testid="match-history-list">
+          {MATCH_HISTORY_FIXTURES.map((match) => (
+            <li
+              key={`${match.opponent}-${match.timestamp}`}
+              className="flex flex-wrap items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-4 py-3"
+            >
+              <div className="flex flex-col">
+                <span className="text-xs uppercase tracking-[0.3em] text-white/40">Opponent</span>
+                <span className="font-semibold">{match.opponent}</span>
+              </div>
+              <div className="flex flex-col text-right">
+                <span className="text-xs uppercase tracking-[0.3em] text-white/40">Outcome</span>
+                <span className={match.result === "Win" ? "text-emerald-300" : "text-rose-300"}>{match.result}</span>
+              </div>
+              <div className="text-xs text-white/50">{match.direction} · {match.delta} · {match.timestamp}</div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

@@ -25,6 +25,7 @@ const ResultModal = ({ isOpen, result, onClose }: ResultModalProps) => {
           onClick={onClose}
         >
           <motion.div
+            data-testid="result-modal"
             layout
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

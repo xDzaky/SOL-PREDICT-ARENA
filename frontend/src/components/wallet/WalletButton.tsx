@@ -12,6 +12,8 @@ const NETWORK_LABELS: Record<NetworkCluster, string> = {
   "mainnet-beta": "Mainnet",
 };
 
+const IS_E2E_TEST = import.meta.env.VITE_E2E_TEST === "true";
+
 const truncateAddress = (address: string) => `${address.slice(0, 4)}…${address.slice(-4)}`;
 
 const getExplorerUrl = (address: PublicKey, network: NetworkCluster) => {
@@ -41,12 +43,16 @@ export const WalletButton = () => {
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
+  const fallbackPublicKey = useMemo(() => new PublicKey("11111111111111111111111111111111"), []);
+  const effectiveConnected = connected || IS_E2E_TEST;
+  const effectivePublicKey = effectiveConnected ? publicKey ?? fallbackPublicKey : publicKey;
+
   const statusLabel = useMemo(() => {
     if (isSwitching) return "Switching";
     if (connecting) return "Connecting";
     if (disconnecting) return "Disconnecting";
-    return connected ? "Connected" : "Disconnected";
-  }, [connected, connecting, disconnecting, isSwitching]);
+    return effectiveConnected ? "Connected" : "Disconnected";
+  }, [effectiveConnected, connecting, disconnecting, isSwitching]);
 
   useEffect(() => {
     if (!publicKey || !connected) {
@@ -116,9 +122,9 @@ export const WalletButton = () => {
   };
 
   const handleCopy = async () => {
-    if (!publicKey) return;
+    if (!effectivePublicKey) return;
     try {
-      await navigator.clipboard.writeText(publicKey.toBase58());
+      await navigator.clipboard.writeText(effectivePublicKey.toBase58());
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (copyError) {
@@ -128,8 +134,8 @@ export const WalletButton = () => {
   };
 
   const handleViewExplorer = () => {
-    if (!publicKey) return;
-    window.open(getExplorerUrl(publicKey, network), "_blank", "noopener,noreferrer");
+    if (!effectivePublicKey) return;
+    window.open(getExplorerUrl(effectivePublicKey, network), "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -144,6 +150,7 @@ export const WalletButton = () => {
           <select
             value={network}
             onChange={(event) => setNetwork(event.target.value as NetworkCluster)}
+            data-testid="network-select"
             className="rounded-full border border-white/10 bg-slate-900/60 px-3 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             {Object.entries(NETWORK_LABELS).map(([value, label]) => (
@@ -158,11 +165,12 @@ export const WalletButton = () => {
       <div className="mt-6">
         <button
           type="button"
-          onClick={connected ? () => setDropdownOpen((prev) => !prev) : handleConnect}
+          onClick={effectiveConnected ? () => setDropdownOpen((prev) => !prev) : handleConnect}
+          data-testid="wallet-connect-button"
           className={clsx(
             "group relative flex w-full items-center justify-between gap-3 rounded-2xl border px-5 py-4 text-left transition",
             "border-white/10 bg-white/5 hover:border-cyan-300/60 hover:bg-white/10",
-            connected ? "text-white" : "text-slate-100",
+            effectiveConnected ? "text-white" : "text-slate-100",
             (connecting || disconnecting || isSwitching) && "cursor-progress"
           )}
           disabled={connecting || disconnecting || isSwitching}
@@ -173,12 +181,14 @@ export const WalletButton = () => {
             </div>
             <div>
               <p className="text-sm font-semibold">
-                {connected && publicKey ? truncateAddress(publicKey.toBase58()) : "Connect Wallet"}
+                {effectiveConnected && effectivePublicKey ? truncateAddress(effectivePublicKey.toBase58()) : "Connect Wallet"}
               </p>
-              <p className="text-xs text-slate-400">{statusLabel}</p>
+              <p className="text-xs text-slate-400" data-testid="wallet-connection-status">
+                {statusLabel}
+              </p>
             </div>
           </div>
-          {connected && (
+          {effectiveConnected && (
             <div className="flex items-center gap-2 text-sm text-cyan-300">
               <span>{fetchingBalance ? <Loader2 className="h-4 w-4 animate-spin" /> : `${balance} SOL`}</span>
               <svg
@@ -197,7 +207,7 @@ export const WalletButton = () => {
           )}
         </button>
 
-        {dropdownOpen && connected && (
+        {dropdownOpen && effectiveConnected && (
           <div
             ref={dropdownRef}
             className="mt-3 rounded-2xl border border-white/10 bg-slate-900/90 p-3 shadow-xl backdrop-blur"
@@ -236,7 +246,7 @@ export const WalletButton = () => {
         <div className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
           <div>
             <p className="text-slate-300">Preferred Wallet</p>
-            <p className="text-slate-500">{wallet?.adapter?.name ?? "Not selected"}</p>
+            <p className="text-slate-500">{wallet?.adapter?.name ?? (IS_E2E_TEST ? "Test Wallet" : "Not selected")}</p>
           </div>
           <button
             type="button"
